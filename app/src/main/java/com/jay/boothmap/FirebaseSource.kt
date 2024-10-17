@@ -38,13 +38,26 @@ class FirebaseSource {
 
     // Function to update booth data in Realtime Database
     suspend fun updateBooth(cityName: String, boothName: String, updatedBooth: Booth) {
+        // Convert Booth object to a Map for updating in Firebase
+        val boothMap = mapOf(
+            "id" to updatedBooth.id,
+            "name" to updatedBooth.name,
+            "bloName" to updatedBooth.bloName,
+            "bloContact" to updatedBooth.bloContact,
+            "district" to updatedBooth.district,
+            "taluka" to updatedBooth.taluka,
+            "city" to updatedBooth.city,
+            "latitude" to updatedBooth.latitude,
+            "longitude" to updatedBooth.longitude
+        )
+
+        // Update booth data in Firebase using the map
         db.child("Cities")
             .child(cityName)
             .child(boothName)
-            .setValue(updatedBooth)
+            .updateChildren(boothMap) // Pass the map here
             .await()
     }
-
     // Function to get a specific booth by ID from Realtime Database
     suspend fun getBoothById(cityName: String, boothId: String,boothName:String): Booth? {
         val boothSnapshot = db.child("Cities")

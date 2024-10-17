@@ -78,7 +78,7 @@ class EditViewModel(private val boothRepository: BoothRepository) : ViewModel() 
     }
 
     // Save booth updates
-    fun updateBooth(cityName: String, boothId: String, onComplete: () -> Unit) {
+    fun updateBooth(cityName: String, boothId: String, updatedBooth: Booth) {
         if (!validateFields()) {
             uiState = uiState.copy(error = "Please fill in all required fields")
             return
@@ -102,7 +102,7 @@ class EditViewModel(private val boothRepository: BoothRepository) : ViewModel() 
 
                 boothRepository.updateBooth(cityName, boothId, updatedBooth)
                 uiState = uiState.copy(isLoading = false, saveSuccess = true)
-                onComplete()
+
             } catch (e: Exception) {
                 uiState = uiState.copy(
                     error = "Failed to update booth: ${e.message}",
