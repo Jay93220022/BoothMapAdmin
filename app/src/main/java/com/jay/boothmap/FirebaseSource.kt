@@ -43,6 +43,13 @@ class FirebaseSource {
             .await()
     }
 
+    suspend fun deleteBooth(city: String, boothName: String) {
+        db.child("Cities")
+            .child(city)
+            .child(boothName)
+            .removeValue()
+            .await()
+    }
     // Modified addBooth function to handle image upload
     suspend fun addBoothWithImage(newBooth: Booth, imageUri: Uri?): String {
         // First upload the image if provided
@@ -132,4 +139,6 @@ class FirebaseSource {
                 }
         }
     }
+
+
 }

@@ -278,7 +278,7 @@ private fun CityCard(city: City, navController: NavController, viewModel: ListVi
                         }
                         else -> {
                             city.booths.forEach { booth ->
-                                BoothItem(city = city.name, booth = booth, navController = navController)
+                                BoothItem(city = city.name, booth = booth, navController = navController,viewModel)
                             }
                         }
                     }
@@ -290,7 +290,41 @@ private fun CityCard(city: City, navController: NavController, viewModel: ListVi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BoothItem(city: String, booth: Booth, navController: NavController) {
+fun BoothItem(city: String, booth: Booth, navController: NavController, listViewModel: ListViewModel) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+
+    if (showDeleteDialog) {
+        AlertDialog(
+
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(text = "Delete Booth") },
+            text = { Text("Are you sure you want to delete the booth \"${booth.name}\"? This action cannot be undone.") },
+            containerColor = EciWhite,
+            textContentColor = Color.Black,
+            titleContentColor = EciGreen,
+            iconContentColor = EciOrange,
+
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        listViewModel.deleteBooth(city, booth.name)
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Delete", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text("Cancel", color = EciGreen)
+                }
+            }
+        )
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = EciWhite),
@@ -351,6 +385,13 @@ private fun BoothItem(city: String, booth: Booth, navController: NavController) 
             ) {
                 Text("Edit")
             }
+            TextButton(
+                onClick = { showDeleteDialog = true },
+                colors = ButtonDefaults.textButtonColors(contentColor = EciOrange)
+            ) {
+                Text("Delete")
+            }
         }
     }
 }
+

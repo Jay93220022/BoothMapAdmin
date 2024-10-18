@@ -90,7 +90,9 @@ class BoothRepository(private val firebaseSource: FirebaseSource) {
     suspend fun addBooth(newBooth: Booth) {
         firebaseSource.addBooth(newBooth)
     }
-
+    suspend fun deleteBooth(city: String, boothId: String) {
+        firebaseSource.deleteBooth(city, boothId)
+    }
     //Add parameter for image uri
     suspend fun updateBooth(cityName: String, boothId: String, updatedBooth: Booth) {
         firebaseSource.updateBooth(cityName, boothId, updatedBooth, updatedBooth.imageUri.toUri())

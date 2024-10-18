@@ -152,11 +152,13 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = eciOrange,
                 focusedLabelColor = eciOrange,
+                unfocusedBorderColor = eciGreen,
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
-                cursorColor = eciOrange
+                cursorColor = eciOrange,
             ),
-            singleLine = true
+            singleLine = true,
+
         )
 
         OutlinedTextField(
@@ -167,6 +169,7 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = eciOrange,
                 focusedLabelColor = eciOrange,
+                unfocusedBorderColor = eciGreen,
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
                 cursorColor = eciOrange,
@@ -183,9 +186,10 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = eciOrange,
                 focusedLabelColor = eciOrange,
+                unfocusedBorderColor = eciGreen,
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
-                cursorColor = eciOrange
+                cursorColor = eciOrange,
             ),
             singleLine = true
         )
@@ -198,9 +202,10 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = eciOrange,
                 focusedLabelColor = eciOrange,
+                unfocusedBorderColor = eciGreen,
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
-                cursorColor = eciOrange
+                cursorColor = eciOrange,
             ), singleLine = true
         )
 
@@ -221,9 +226,10 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = eciOrange,
                     focusedLabelColor = eciOrange,
+                    unfocusedBorderColor = eciGreen,
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black,
-                    cursorColor = eciOrange
+                    cursorColor = eciOrange,
                 ), singleLine = true
             )
             ExposedDropdownMenu(
@@ -252,9 +258,10 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = eciOrange,
                 focusedLabelColor = eciOrange,
+                unfocusedBorderColor = eciGreen,
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
-                cursorColor = eciOrange
+                cursorColor = eciOrange,
             ), singleLine = true
         )
 
@@ -266,9 +273,10 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = eciOrange,
                 focusedLabelColor = eciOrange,
+                unfocusedBorderColor = eciGreen,
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
-                cursorColor = eciOrange
+                cursorColor = eciOrange,
             ), singleLine = true
         )
 
@@ -286,9 +294,10 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = eciOrange,
                     focusedLabelColor = eciOrange,
+                    unfocusedBorderColor = eciGreen,
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black,
-                    cursorColor = eciOrange
+                    cursorColor = eciOrange,
                 ), singleLine = true
             )
 
@@ -302,9 +311,10 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = eciOrange,
                     focusedLabelColor = eciOrange,
+                    unfocusedBorderColor = eciGreen,
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black,
-                    cursorColor = eciOrange
+                    cursorColor = eciOrange,
                 ), singleLine = true
             )
         }
@@ -456,6 +466,7 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
                         }
                     }
                 },
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = eciOrange,

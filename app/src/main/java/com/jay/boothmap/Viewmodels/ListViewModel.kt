@@ -3,8 +3,11 @@ package com.jay.boothmap.Viewmodels
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
 import com.jay.boothmap.Dataclasses.City
 import com.jay.boothmap.Repositories.BoothRepository
 import kotlinx.coroutines.Job
@@ -28,6 +31,8 @@ class ListViewModel(private val repository: BoothRepository) : ViewModel() {
     val errorMessage: State<String?> = _errorMessage
 
     private var searchJob: Job? = null
+
+
 
     init {
         fetchCities()
@@ -94,6 +99,21 @@ class ListViewModel(private val repository: BoothRepository) : ViewModel() {
         }
     }
 
+    private val _deleteStatus = MutableLiveData<Result<Boolean>>()
+    val deleteStatus: LiveData<Result<Boolean>> = _deleteStatus
+
+    // Existing methods...
+
+    fun deleteBooth(city: String, boothName: String) {
+        viewModelScope.launch {
+            try {
+                repository.deleteBooth(city, boothName)
+                _deleteStatus.value = Result.success(true)
+            } catch (e: Exception) {
+                _deleteStatus.value = Result.failure(e)
+            }
+        }
+    }
     private fun filterCitiesByQuery(query: String): List<City> {
         val trimmedQuery = query.trim().lowercase()
         return if (trimmedQuery.isEmpty()) {
@@ -123,4 +143,8 @@ class ListViewModel(private val repository: BoothRepository) : ViewModel() {
     fun refreshData() {
         fetchCities()
     }
+
+
+
+
 }
