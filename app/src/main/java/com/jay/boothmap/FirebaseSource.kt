@@ -43,9 +43,34 @@ class FirebaseSource {
             .await()
     }
 
-    // Function to update booth data in Realtime Database
-    suspend fun updateBooth(cityName: String, boothName: String, updatedBooth: Booth) {
-        // Convert Booth object to a Map for updating in Firebase
+    // Modified addBooth function to handle image upload
+    suspend fun addBoothWithImage(newBooth: Booth, imageUri: Uri?): String {
+        // First upload the image if provided
+        val imageUrl = imageUri?.let {
+            uploadImageToFirebaseStorage(it)
+        } ?: ""
+
+        // Create booth with image URL
+        val boothWithImage = newBooth.copy(imageUri = imageUrl)
+
+        // Add to realtime database
+        db.child("Cities")
+            .child(boothWithImage.city)
+            .child(boothWithImage.name)
+            .setValue(boothWithImage)
+            .await()
+
+        return imageUrl
+    }
+
+    // Modified update function to handle image
+    suspend fun updateBooth(cityName: String, boothName: String, updatedBooth: Booth, newImageUri: Uri?) {
+        // Upload new image if provided
+        val imageUrl = newImageUri?.let {
+            uploadImageToFirebaseStorage(it)
+        } ?: updatedBooth.imageUri // Keep existing image URL if no new image
+
+        // Create updated booth map with image URL
         val boothMap = mapOf(
             "id" to updatedBooth.id,
             "name" to updatedBooth.name,
@@ -55,16 +80,18 @@ class FirebaseSource {
             "taluka" to updatedBooth.taluka,
             "city" to updatedBooth.city,
             "latitude" to updatedBooth.latitude,
-            "longitude" to updatedBooth.longitude
+            "longitude" to updatedBooth.longitude,
+            "imageUri" to imageUrl
         )
 
-        // Update booth data in Firebase using the map
+        // Update booth data in Firebase
         db.child("Cities")
             .child(cityName)
             .child(boothName)
-            .updateChildren(boothMap) // Pass the map here
+            .updateChildren(boothMap)
             .await()
     }
+
     // Function to get a specific booth by ID from Realtime Database
     suspend fun getBoothByName(cityName: String, boothName: String): Booth? {
         val boothQuerySnapshot = db.child("Cities")
@@ -87,22 +114,21 @@ class FirebaseSource {
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun uploadImageToFirebaseStorage(imageUri: Uri): String {
         return suspendCancellableCoroutine { continuation ->
-            // Create a unique filename for the image
-
-            val imageRef: StorageReference = storage.child("booths/${System.currentTimeMillis()}.jpg")
+            val timestamp = System.currentTimeMillis()
+            val imageRef: StorageReference = storage.child("booths/booth_image_$timestamp.jpg")
 
             // Upload the image
             imageRef.putFile(imageUri)
                 .addOnSuccessListener {
                     // Get the download URL
                     imageRef.downloadUrl.addOnSuccessListener { uri ->
-                        continuation.resume(uri.toString()) // Return the URL
+                        continuation.resume(uri.toString())
                     }.addOnFailureListener { exception ->
-                        continuation.resumeWithException(exception) // Handle failure to get URL
+                        continuation.resumeWithException(exception)
                     }
                 }
                 .addOnFailureListener { exception ->
-                    continuation.resumeWithException(exception) // Handle failure to upload
+                    continuation.resumeWithException(exception)
                 }
         }
     }

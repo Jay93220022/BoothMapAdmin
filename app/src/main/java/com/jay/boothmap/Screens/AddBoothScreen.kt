@@ -34,7 +34,9 @@ import com.google.android.gms.location.LocationServices
 import com.jay.boothmap.Dataclasses.Booth
 import com.jay.boothmap.Navigation.Screen
 import com.jay.boothmap.R
+import com.jay.boothmap.Repositories.PermissionHandler
 import com.jay.boothmap.Viewmodels.AddBoothViewModel
+import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,10 +52,23 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
     var id by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
+    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    val scope = rememberCoroutineScope()
 
+    var isLoading by remember { mutableStateOf(false) }
+
+
+
+    //Taking permissions
+    val permissionHandler = remember { PermissionHandler() }
     val context = LocalContext.current
+
+    // Permission request composable
+    permissionHandler.RequestPermissions(context)
+
+
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val districts = stringArrayResource(id = R.array.maharashtra_districts)
 
@@ -61,43 +76,31 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
     val eciGreen = Color(0xFF017A3E)
     val eciWhite = Color.White
 
-    // Gallery and camera launchers
-    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageUri = uri
-    }
-
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (!success) {
-            imageUri = null
+    // Gallery launcher
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            imageUri = it
         }
     }
 
-    // Permission Launchers
-    val requestCameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            val file = createImageFile(context)
-            if (file != null) {
-                imageUri = FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.provider",
-                    file
-                )
-                imageUri?.let { uri ->
-                    cameraLauncher.launch(uri)
-                }
+
+    // Camera launcher
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            // If the picture was taken successfully, set the temporary URI as the actual image URI
+            tempImageUri?.let {
+                imageUri = it
+                bitmap = null  // Clear any existing bitmap
             }
-        } else {
-            Toast.makeText(context, "Camera permission is required to capture image", Toast.LENGTH_SHORT).show()
         }
     }
 
-    val requestStoragePermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            galleryLauncher.launch("image/*")
-        } else {
-            Toast.makeText(context, "Storage permission is required to access gallery", Toast.LENGTH_SHORT).show()
-        }
-    }
+
+
 
     // Function to get current location
     fun getCurrentLocation() {
@@ -306,14 +309,18 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
             )
         }
 
-        // Buttons to select image from gallery or capture using camera
+        // Image selection buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
                 onClick = {
-                    requestStoragePermissionLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                    if (permissionHandler.hasStoragePermissions(context)) {
+                        galleryLauncher.launch("image/*")
+                    } else {
+                        Toast.makeText(context, "Storage permission required", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = eciGreen)
             ) {
@@ -322,13 +329,52 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
 
             Button(
                 onClick = {
-                    requestCameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                    if (permissionHandler.hasCameraPermission(context)) {
+                        val file = createImageFile(context)
+                        file?.let {
+                            tempImageUri = FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.provider",
+                                it
+                            )
+                            tempImageUri?.let { uri ->
+                                cameraLauncher.launch(uri)
+                            }
+                        }
+                    } else {
+                        Toast.makeText(context, "Camera permission required", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = eciGreen)
             ) {
                 Text("Capture Image", color = eciWhite)
             }
         }
+
+// Update the image display code:
+        imageUri?.let { uri ->
+            LaunchedEffect(uri) {
+                try {
+                    val inputStream = context.contentResolver.openInputStream(uri)
+                    bitmap = BitmapFactory.decodeStream(inputStream)
+                } catch (e: Exception) {
+                    Log.e("AddBoothScreen", "Error decoding image: ${e.message}")
+                    Toast.makeText(context, "Failed to load image", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            bitmap?.let { img ->
+                Image(
+                    bitmap = img.asImageBitmap(),
+                    contentDescription = "Selected Image",
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .border(2.dp, eciOrange, RoundedCornerShape(8.dp))
+                )
+            }
+        }
+
 
         imageUri?.let { uri ->
             Log.d("AddBoothScreen", "Image URI: $uri")
@@ -355,44 +401,69 @@ fun AddBoothScreen(navController: NavController, viewModel: AddBoothViewModel) {
                 )
             } ?: run {
                 Log.e("AddBoothScreen", "Failed to decode image: Bitmap is null")
-                Toast.makeText(context, "Failed to decode image", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "Failed to decode image", Toast.LENGTH_SHORT).show()
             }
         }
-
-        // Submit Button
-        Button(
-
-
-            onClick = {
-                if (name.isEmpty() || bloname.isEmpty() || bloContact.isEmpty() || district.isEmpty() ||
-                    taluka.isEmpty() || city.isEmpty()
-                ) {
-                    Toast.makeText(context, "Please fill in all the required fields", Toast.LENGTH_SHORT).show()
-                } else {
-                    val newBooth = Booth(
-                        id = id,
-                        name = name,
-                        bloName = bloname,
-                        bloContact = bloContact,
-                        district = district,
-                        taluka = taluka,
-                        latitude = latitude,
-                        longitude = longitude,
-                        city = city,
-                    )
-                    viewModel.addBooth(newBooth) {
-                        Toast.makeText(context, "Booth Added Successfully", Toast.LENGTH_SHORT).show()
-                        navController.navigate(Screen.ListScreen.route)
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = eciOrange,
-                contentColor = eciWhite
+        if (isLoading) {
+            CircularProgressIndicator(
+                color = eciOrange,
+                modifier = Modifier.padding(16.dp)
             )
-        ) {
-            Text("Add Booth", fontSize = 18.sp)
+        }else {
+            Button(
+                onClick = {
+                    if (name.isEmpty() || bloname.isEmpty() || bloContact.isEmpty() || district.isEmpty() ||
+                        taluka.isEmpty() || city.isEmpty()
+                    ) {
+                        Toast.makeText(
+                            context,
+                            "Please fill in all the required fields",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        // Show loading indicator
+                        scope.launch {
+                            isLoading = true
+                            try {
+                                // Create the new booth
+                                val newBooth = Booth(
+                                    id = id,
+                                    name = name,
+                                    bloName = bloname,
+                                    bloContact = bloContact,
+                                    district = district,
+                                    taluka = taluka,
+                                    latitude = latitude,
+                                    longitude = longitude,
+                                    city = city,
+                                    imageUri = "" // This will be updated by Firebase
+                                )
+
+                                // Add booth with image
+                                viewModel.addBoothWithImage(newBooth, imageUri) {
+                                    isLoading = false
+                                    Toast.makeText(
+                                        context,
+                                        "Booth Added Successfully",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    navController.navigate(Screen.ListScreen.route)
+                                }
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = eciOrange,
+                    contentColor = eciWhite
+                )
+            ) {
+                Text("Add Booth", fontSize = 18.sp)
+            }
         }
     }
 }

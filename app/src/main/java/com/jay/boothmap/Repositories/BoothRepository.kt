@@ -1,6 +1,7 @@
 package com.jay.boothmap.Repositories
 
 import android.util.Log
+import androidx.core.net.toUri
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -20,7 +21,6 @@ class BoothRepository(private val firebaseSource: FirebaseSource) {
         return firebaseSource.getCities()
     }
 
-    private val database = FirebaseDatabase.getInstance().getReference("Cities")
     private val cityRef = Firebase.database.getReference("Cities")
 
     suspend fun fetchBoothsForCity(cityName: String): List<Booth> = suspendCancellableCoroutine { continuation ->
@@ -91,8 +91,8 @@ class BoothRepository(private val firebaseSource: FirebaseSource) {
         firebaseSource.addBooth(newBooth)
     }
 
-
+    //Add parameter for image uri
     suspend fun updateBooth(cityName: String, boothId: String, updatedBooth: Booth) {
-        firebaseSource.updateBooth(cityName, boothId, updatedBooth)
+        firebaseSource.updateBooth(cityName, boothId, updatedBooth, updatedBooth.imageUri.toUri())
     }
 }
