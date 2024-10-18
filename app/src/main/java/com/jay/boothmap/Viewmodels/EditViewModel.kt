@@ -1,5 +1,6 @@
 package com.jay.boothmap.Viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,12 +16,11 @@ class EditViewModel(private val boothRepository: BoothRepository) : ViewModel() 
     var uiState by mutableStateOf(EditBoothUiState())
         private set
 
-    // Fetch booth details
-    fun fetchBoothById(cityName: String, boothId: String,boothName:String) {
+    fun fetchBoothByName(cityName: String, boothName: String) {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(isLoading = true, error = null)
-                val fetchedBooth = boothRepository.getBoothById(cityName, boothId,boothName)
+                val fetchedBooth = boothRepository.getBoothByName(cityName, boothName)
 
                 if (fetchedBooth != null) {
                     uiState = uiState.copy(
@@ -31,6 +31,7 @@ class EditViewModel(private val boothRepository: BoothRepository) : ViewModel() 
                             bloContact = fetchedBooth.bloContact,
                             district = fetchedBooth.district,
                             taluka = fetchedBooth.taluka,
+                            city = fetchedBooth.city,
                             latitude = fetchedBooth.latitude,
                             longitude = fetchedBooth.longitude
                         ),
@@ -50,6 +51,7 @@ class EditViewModel(private val boothRepository: BoothRepository) : ViewModel() 
             }
         }
     }
+
 
     // Update booth field values
     fun updateField(field: String, value: String) {
@@ -76,7 +78,17 @@ class EditViewModel(private val boothRepository: BoothRepository) : ViewModel() 
                 fields.district.isNotBlank() &&
                 fields.taluka.isNotBlank()
     }
+    fun addBooth(newBooth: Booth,) {
+        viewModelScope.launch {
+            try {
+                boothRepository.addBooth(newBooth)
 
+            } catch (e: Exception) {
+                Log.e("ListViewModel", "Error adding booth: ${e.message}")
+                // Handle the error (show a toast or update UI state)
+            }
+        }
+    }
     // Save booth updates
     fun updateBooth(cityName: String, boothId: String, updatedBooth: Booth) {
         if (!validateFields()) {

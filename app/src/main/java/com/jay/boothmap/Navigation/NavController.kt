@@ -26,20 +26,28 @@ fun Navigation(
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = Screen.ListScreen.route) {
-        composable(Screen.ListScreen.route) { ListScreen(navController, listViewModel) }
-        composable(
-            "${Screen.EditScreen.route}/{cityName}/{boothId}",
-            arguments = listOf(
-                navArgument("cityName") { type = NavType.StringType },
-                navArgument("boothId") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val cityName = backStackEntry.arguments?.getString("cityName") ?: ""
-            val boothId = backStackEntry.arguments?.getString("boothId") ?: ""
-            val  boothName:String =backStackEntry.arguments?.getString("name")?:""
-            EditScreen(navController, editViewModel, boothId, cityName, boothName)
+        composable(Screen.ListScreen.route) {
+            ListScreen(navController, listViewModel)
         }
-        composable(Screen.AddBoothScreen.route) { AddBoothScreen(navController, addBoothViewModel) }
 
+        composable("editScreen?city={city}&boothId={boothId}&boothName={boothName}&bloName={bloName}&bloContact={bloContact}&district={district}&taluka={taluka}&latitude={latitude}&longitude={longitude}") { backStackEntry ->
+            val cityName = backStackEntry.arguments?.getString("city") ?: ""
+            val boothId = backStackEntry.arguments?.getString("boothId") ?: ""
+            val boothName = backStackEntry.arguments?.getString("boothName") ?: ""
+            val bloName = backStackEntry.arguments?.getString("bloName") ?: ""
+            val bloContact = backStackEntry.arguments?.getString("bloContact") ?: ""
+            val district = backStackEntry.arguments?.getString("district") ?: ""
+            val taluka = backStackEntry.arguments?.getString("taluka") ?: ""
+            val latitude = backStackEntry.arguments?.getString("latitude")?.toDoubleOrNull() ?: 0.0
+            val longitude = backStackEntry.arguments?.getString("longitude")?.toDoubleOrNull() ?: 0.0
+
+            EditScreen(navController, editViewModel, cityName, boothId, boothName, bloName, bloContact, district, taluka, latitude, longitude)
+        }
+
+
+        composable(Screen.AddBoothScreen.route) {
+            AddBoothScreen(navController, addBoothViewModel)
+        }
     }
+
 }

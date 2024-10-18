@@ -59,14 +59,21 @@ class FirebaseSource {
             .await()
     }
     // Function to get a specific booth by ID from Realtime Database
-    suspend fun getBoothById(cityName: String, boothId: String,boothName:String): Booth? {
-        val boothSnapshot = db.child("Cities")
+    suspend fun getBoothByName(cityName: String, boothName: String): Booth? {
+        val boothQuerySnapshot = db.child("Cities")
             .child(cityName)
-            .child(boothName)
-            .child(boothId)
+            .orderByChild(boothName)  // Query by the 'name' field, which corresponds to the boothName
+            .equalTo(boothName)
             .get()
             .await()
 
-        return boothSnapshot.getValue(Booth::class.java)?.copy(id = boothId, city = cityName)
+        for (snapshot in boothQuerySnapshot.children) {
+            val booth = snapshot.getValue(Booth::class.java)
+            if (booth != null) {
+                return booth.copy(id = snapshot.key ?: "", city = cityName)
+            }
+        }
+        return null  // Return null if no booth is found
     }
+
 }

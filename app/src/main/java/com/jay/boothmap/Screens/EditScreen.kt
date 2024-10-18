@@ -19,28 +19,36 @@ import androidx.navigation.NavController
 import com.jay.boothmap.Dataclasses.Booth
 import com.jay.boothmap.Viewmodels.EditViewModel
 @Composable
-fun EditScreen(navController: NavController, viewModel: EditViewModel, cityName: String, boothId: String, boothName: String) {
+fun EditScreen(
+    navController: NavController,
+    viewModel: EditViewModel,
+    cityName: String,
+    boothId: String,
+    boothName: String,
+    bloName: String,
+    bloContact:String,
+    district:String,
+    taluka:String,
+    latitude:Double,
+    longitude:Double
+) {
     val uiState = viewModel.uiState
+    val booth = navController.previousBackStackEntry?.arguments?.getParcelable<Booth>("booth")
 
-    // Initialize fields with existing values
-    var name by remember { mutableStateOf(uiState.boothFields.name) }
-    var id by remember { mutableStateOf(uiState.boothFields.id) }
-    var bloName by remember { mutableStateOf(uiState.boothFields.bloName) }
-    var bloContact by remember { mutableStateOf(uiState.boothFields.bloContact) }
-    var district by remember { mutableStateOf(uiState.boothFields.district) }
-    var taluka by remember { mutableStateOf(uiState.boothFields.taluka) }
-    var city by remember { mutableStateOf(uiState.boothFields.city) }
+    //if (booth == null) {
+        //CircularProgressIndicator() // Handle empty state if needed
+        //return
+    //}
 
-    // Fetch booth details when screen is launched
-    LaunchedEffect(Unit) {
-        viewModel.fetchBoothById(cityName, boothId, boothName)
-    }
-
-    // Handle loading state
-    if (uiState.isLoading) {
-        CircularProgressIndicator()
-        return
-    }
+    // State variables
+    var name by remember { mutableStateOf(boothName) }
+    var id by remember { mutableStateOf(boothId) }
+    var bloName by remember { mutableStateOf(bloName) }
+    var bloContact by remember { mutableStateOf(bloContact) }
+    var district by remember { mutableStateOf(district) }
+    var taluka by remember { mutableStateOf(taluka) }
+    var city by remember { mutableStateOf(cityName) }
+    var isLoading by remember { mutableStateOf(false) }
 
     // Regular form content
     Column(modifier = Modifier.padding(16.dp)) {
@@ -59,7 +67,7 @@ fun EditScreen(navController: NavController, viewModel: EditViewModel, cityName:
                 id = it
                 viewModel.updateField("id", it)
             },
-            label = { Text(text = "Booth ID") }
+            label = { Text("Booth ID") }
         )
 
         OutlinedTextField(
@@ -68,7 +76,7 @@ fun EditScreen(navController: NavController, viewModel: EditViewModel, cityName:
                 bloName = it
                 viewModel.updateField("bloName", it)
             },
-            label = { Text(text = "BLO Name") }
+            label = { Text("BLO Name") }
         )
 
         OutlinedTextField(
@@ -77,7 +85,7 @@ fun EditScreen(navController: NavController, viewModel: EditViewModel, cityName:
                 bloContact = it
                 viewModel.updateField("bloContact", it)
             },
-            label = { Text(text = "BLO Contact") }
+            label = { Text("BLO Contact") }
         )
 
         OutlinedTextField(
@@ -86,7 +94,7 @@ fun EditScreen(navController: NavController, viewModel: EditViewModel, cityName:
                 district = it
                 viewModel.updateField("district", it)
             },
-            label = { Text(text = "District") }
+            label = { Text("District") }
         )
 
         OutlinedTextField(
@@ -95,7 +103,7 @@ fun EditScreen(navController: NavController, viewModel: EditViewModel, cityName:
                 taluka = it
                 viewModel.updateField("taluka", it)
             },
-            label = { Text(text = "Taluka") }
+            label = { Text("Taluka") }
         )
 
         OutlinedTextField(
@@ -104,12 +112,21 @@ fun EditScreen(navController: NavController, viewModel: EditViewModel, cityName:
                 city = it
                 viewModel.updateField("city", it)
             },
-            label = { Text(text = "City") }
+            label = { Text("City") }
         )
 
         // Update button
         Button(onClick = {
-            // Create the updated Booth object with current field values
+            // Validate fields
+            if (name.isEmpty() || id.isEmpty() || bloName.isEmpty() || bloContact.isEmpty() || district.isEmpty() || taluka.isEmpty() || city.isEmpty()) {
+                // Handle error (e.g., show a Toast or Snackbar)
+                return@Button
+            }
+
+            // Set loading state
+            isLoading = true
+
+            // Create the updated Booth object
             val updatedBooth = Booth(
                 id = id,
                 city = city,
@@ -118,14 +135,20 @@ fun EditScreen(navController: NavController, viewModel: EditViewModel, cityName:
                 bloContact = bloContact,
                 district = district,
                 taluka = taluka,
-                latitude = uiState.boothFields.latitude, // Keeping latitude unchanged
-                longitude = uiState.boothFields.longitude // Keeping longitude unchanged
+                latitude = latitude, // Keep latitude unchanged
+                longitude =  longitude // Keep longitude unchanged
             )
+
             // Call the update function
-            viewModel.updateBooth(cityName, boothName, updatedBooth)
+            viewModel.addBooth(updatedBooth)
+            isLoading = false // Reset loading state
             navController.popBackStack() // Navigate back after successful update
         }) {
-            Text("Update Booth")
+            if (isLoading) {
+                CircularProgressIndicator() // Show loading indicator
+            } else {
+                Text("Update Booth")
+            }
         }
     }
 }

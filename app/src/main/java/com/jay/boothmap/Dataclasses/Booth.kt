@@ -1,5 +1,8 @@
 package com.jay.boothmap.Dataclasses
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 data class Booth(
     val bloContact: String = "",
     val bloName: String = "",
@@ -11,4 +14,4 @@ data class Booth(
     val taluka: String = "",
     val city: String = "",
     val imageUrl: String = ""
-)
+):Parcelable

@@ -83,13 +83,14 @@ class BoothRepository(private val firebaseSource: FirebaseSource) {
         })
     }
 
-    suspend fun getBoothById(cityName: String, boothId: String, boothName: String): Booth? {
-        return firebaseSource.getBoothById(cityName, boothId, boothName)
+    suspend fun getBoothByName(cityName: String, boothName: String): Booth? {
+        return firebaseSource.getBoothByName(cityName, boothName)
     }
 
     suspend fun addBooth(newBooth: Booth) {
         firebaseSource.addBooth(newBooth)
     }
+
 
     suspend fun updateBooth(cityName: String, boothId: String, updatedBooth: Booth) {
         firebaseSource.updateBooth(cityName, boothId, updatedBooth)

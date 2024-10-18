@@ -250,7 +250,7 @@ private fun CityCard(city: City, navController: NavController, viewModel: ListVi
                         }
                         else -> {
                             city.booths.forEach { booth ->
-                                BoothItem(booth = booth, navController = navController)
+                                BoothItem(city = city.name, booth = booth, navController = navController)
                             }
                         }
                     }
@@ -261,12 +261,10 @@ private fun CityCard(city: City, navController: NavController, viewModel: ListVi
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BoothItem(booth: Booth, navController: NavController) {
+private fun BoothItem(city: String, booth: Booth, navController: NavController) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = {
-            navController.navigate("${Screen.EditScreen.route}/${booth.city}/${booth.name}")
-        }
+
     ) {
         Row(
             modifier = Modifier
@@ -311,7 +309,8 @@ private fun BoothItem(booth: Booth, navController: NavController) {
 
             IconButton(
                 onClick = {
-                    navController.navigate("${Screen.EditScreen.route}/${booth.city}/${booth.id}")
+                    navController.navigate("editScreen?city=${city}&boothId=${booth.id}&boothName=${booth.name}&bloName=${booth.bloName}&bloContact=${booth.bloContact}&district=${booth.district}&taluka=${booth.taluka}&latitude=${booth.latitude}&longitude=${booth.longitude}")
+
                 }
             ) {
                 Text("Edit")
