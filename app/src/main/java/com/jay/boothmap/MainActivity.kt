@@ -8,9 +8,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.jay.boothmap.Navigation.Navigation
+import com.jay.boothmap.Repositories.AuthRepository
 import com.jay.boothmap.Repositories.BoothRepository
 import com.jay.boothmap.ui.theme.BoothMapTheme
 import com.jay.boothmap.Viewmodels.AddBoothViewModel
+import com.jay.boothmap.Viewmodels.AuthViewModel
 import com.jay.boothmap.Viewmodels.EditViewModel
 import com.jay.boothmap.Viewmodels.ListViewModel
 
@@ -30,7 +32,8 @@ class MainActivity : ComponentActivity() {
                     Navigation(
                         addBoothViewModel = AddBoothViewModel(BoothRepository(FirebaseSource())),
                         editViewModel = EditViewModel(BoothRepository(FirebaseSource())),
-                        listViewModel = ListViewModel(BoothRepository(FirebaseSource()))
+                        listViewModel = ListViewModel(BoothRepository(FirebaseSource())),
+                        authViewModel = AuthViewModel(AuthRepository())
                     )
                 }
             }

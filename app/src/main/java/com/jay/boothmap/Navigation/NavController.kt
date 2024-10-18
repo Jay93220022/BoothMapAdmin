@@ -10,9 +10,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.jay.boothmap.Screens.AddBoothScreen
 import com.jay.boothmap.Screens.EditScreen
+import com.jay.boothmap.Screens.ForgotPassword
 import com.jay.boothmap.Screens.ListScreen
+import com.jay.boothmap.Screens.Login
+import com.jay.boothmap.Screens.Register
 import com.jay.boothmap.Screens.SplashScreen
 import com.jay.boothmap.Viewmodels.AddBoothViewModel
+import com.jay.boothmap.Viewmodels.AuthViewModel
 import com.jay.boothmap.Viewmodels.EditViewModel
 import com.jay.boothmap.Viewmodels.ListViewModel
 
@@ -22,7 +26,8 @@ import com.jay.boothmap.Viewmodels.ListViewModel
 fun Navigation(
     addBoothViewModel: AddBoothViewModel,
     editViewModel: EditViewModel,
-    listViewModel: ListViewModel
+    listViewModel: ListViewModel,
+    authViewModel: AuthViewModel
 ) {
     val navController = rememberNavController()
 
@@ -33,7 +38,15 @@ fun Navigation(
         composable(Screen.SplashScren.route){
            SplashScreen(navController)
         }
-
+        composable(Screen.Login.route){
+            Login(authViewModel = authViewModel, navController = navController)
+        }
+composable(Screen.Register.route){
+Register(viewModel = authViewModel, navController =navController )
+}
+        composable(Screen.ForgotPassword.route){
+           ForgotPassword(viewModel = authViewModel, navController = navController)
+        }
         composable("editScreen?city={city}&boothId={boothId}&boothName={boothName}&bloName={bloName}&bloContact={bloContact}&district={district}&taluka={taluka}&latitude={latitude}&longitude={longitude}") { backStackEntry ->
             val cityName = backStackEntry.arguments?.getString("city") ?: ""
             val boothId = backStackEntry.arguments?.getString("boothId") ?: ""

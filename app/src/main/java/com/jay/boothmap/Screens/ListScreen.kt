@@ -84,6 +84,7 @@ private fun ListScreenTopBar(
     TopAppBar(
         title = { Text("Booth Map", color = EciWhite) },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
+
         actions = {
             OutlinedTextField(
                 value = searchQuery,
@@ -111,7 +112,7 @@ private fun ListScreenTopBar(
                 Icon(Icons.Default.Refresh, "Refresh", tint = Color.Black)
             }
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().padding(10.dp)
     )
 }
 
@@ -227,7 +228,9 @@ private fun CityCard(city: City, navController: NavController, viewModel: ListVi
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = EciWhite)
+        colors = CardDefaults.cardColors(containerColor = EciWhite),
+        shape = RoundedCornerShape(8.dp),
+        border = ButtonDefaults.outlinedButtonBorder
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

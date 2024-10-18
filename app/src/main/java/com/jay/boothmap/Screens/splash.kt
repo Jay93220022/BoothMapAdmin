@@ -48,7 +48,7 @@ fun SplashScreen(
                 }
             )
         )
-        navController.navigate(Screen.ListScreen.route) {
+        navController.navigate(Screen.Login.route) {
             popUpTo(Screen.SplashScren.route) { inclusive = true }
         }
     }
