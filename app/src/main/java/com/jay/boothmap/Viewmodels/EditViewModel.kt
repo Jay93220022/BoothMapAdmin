@@ -16,42 +16,6 @@ class EditViewModel(private val boothRepository: BoothRepository) : ViewModel() 
     var uiState by mutableStateOf(EditBoothUiState())
         private set
 
-    fun fetchBoothByName(cityName: String, boothName: String) {
-        viewModelScope.launch {
-            try {
-                uiState = uiState.copy(isLoading = true, error = null)
-                val fetchedBooth = boothRepository.getBoothByName(cityName, boothName)
-
-                if (fetchedBooth != null) {
-                    uiState = uiState.copy(
-                        booth = fetchedBooth,
-                        boothFields = Booth(
-                            name = fetchedBooth.name,
-                            bloName = fetchedBooth.bloName,
-                            bloContact = fetchedBooth.bloContact,
-                            district = fetchedBooth.district,
-                            taluka = fetchedBooth.taluka,
-                            city = fetchedBooth.city,
-                            latitude = fetchedBooth.latitude,
-                            longitude = fetchedBooth.longitude
-                        ),
-                        isLoading = false
-                    )
-                } else {
-                    uiState = uiState.copy(
-                        error = "Booth not found",
-                        isLoading = false
-                    )
-                }
-            } catch (e: Exception) {
-                uiState = uiState.copy(
-                    error = "Failed to fetch booth: ${e.message}",
-                    isLoading = false
-                )
-            }
-        }
-    }
-
 
     // Update booth field values
     fun updateField(field: String, value: String) {
@@ -78,7 +42,8 @@ class EditViewModel(private val boothRepository: BoothRepository) : ViewModel() 
                 fields.district.isNotBlank() &&
                 fields.taluka.isNotBlank()
     }
-    fun addBooth(newBooth: Booth,) {
+
+    fun addBooth(newBooth: Booth, ) {
         viewModelScope.launch {
             try {
                 boothRepository.addBooth(newBooth)
@@ -88,50 +53,6 @@ class EditViewModel(private val boothRepository: BoothRepository) : ViewModel() 
                 // Handle the error (show a toast or update UI state)
             }
         }
-    }
-    // Save booth updates
-    fun updateBooth(cityName: String, boothId: String, updatedBooth: Booth) {
-        if (!validateFields()) {
-            uiState = uiState.copy(error = "Please fill in all required fields")
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                uiState = uiState.copy(isLoading = true, error = null)
-
-                val updatedBooth = Booth(
-                    id = boothId,
-                    city = cityName,
-                    name = uiState.boothFields.name,
-                    bloName = uiState.boothFields.bloName,
-                    bloContact = uiState.boothFields.bloContact,
-                    district = uiState.boothFields.district,
-                    taluka = uiState.boothFields.taluka,
-                    latitude = uiState.boothFields.latitude,
-                    longitude = uiState.boothFields.longitude
-                )
-
-                boothRepository.updateBooth(cityName, boothId, updatedBooth)
-                uiState = uiState.copy(isLoading = false, saveSuccess = true)
-
-            } catch (e: Exception) {
-                uiState = uiState.copy(
-                    error = "Failed to update booth: ${e.message}",
-                    isLoading = false
-                )
-            }
-        }
-    }
-
-    // Clear error message
-    fun clearError() {
-        uiState = uiState.copy(error = null)
-    }
-
-    // Reset save success flag
-    fun resetSaveSuccess() {
-        uiState = uiState.copy(saveSuccess = false)
     }
 }
 

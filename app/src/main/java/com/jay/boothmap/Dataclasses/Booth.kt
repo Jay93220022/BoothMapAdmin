@@ -13,5 +13,5 @@ data class Booth(
     val name: String = "",
     val taluka: String = "",
     val city: String = "",
-    val imageUrl: String = ""
+    val imageUri: String=""
 ):Parcelable

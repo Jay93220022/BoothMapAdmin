@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.jay.boothmap.Screens.AddBoothScreen
 import com.jay.boothmap.Screens.EditScreen
 import com.jay.boothmap.Screens.ListScreen
+import com.jay.boothmap.Screens.SplashScreen
 import com.jay.boothmap.Viewmodels.AddBoothViewModel
 import com.jay.boothmap.Viewmodels.EditViewModel
 import com.jay.boothmap.Viewmodels.ListViewModel
@@ -25,9 +26,12 @@ fun Navigation(
 ) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Screen.ListScreen.route) {
+    NavHost(navController = navController, startDestination = Screen.SplashScren.route) {
         composable(Screen.ListScreen.route) {
             ListScreen(navController, listViewModel)
+        }
+        composable(Screen.SplashScren.route){
+           SplashScreen(navController)
         }
 
         composable("editScreen?city={city}&boothId={boothId}&boothName={boothName}&bloName={bloName}&bloContact={bloContact}&district={district}&taluka={taluka}&latitude={latitude}&longitude={longitude}") { backStackEntry ->

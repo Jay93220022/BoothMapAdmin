@@ -1,13 +1,20 @@
 package com.jay.boothmap
 
+import android.net.Uri
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.jay.boothmap.Dataclasses.Booth
 import com.jay.boothmap.Dataclasses.City
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class FirebaseSource {
     private val db = FirebaseDatabase.getInstance("https://boothmap-d6a5f-default-rtdb.asia-southeast1.firebasedatabase.app/").reference
-
+    private val storage = FirebaseStorage.getInstance().reference
     // Function to get cities and booths from Realtime Database
     suspend fun getCities(): List<City> {
         val citiesSnapshot = db.child("Cities").get().await() // Change to use Realtime Database
@@ -76,4 +83,27 @@ class FirebaseSource {
         return null  // Return null if no booth is found
     }
 
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun uploadImageToFirebaseStorage(imageUri: Uri): String {
+        return suspendCancellableCoroutine { continuation ->
+            // Create a unique filename for the image
+
+            val imageRef: StorageReference = storage.child("booths/${System.currentTimeMillis()}.jpg")
+
+            // Upload the image
+            imageRef.putFile(imageUri)
+                .addOnSuccessListener {
+                    // Get the download URL
+                    imageRef.downloadUrl.addOnSuccessListener { uri ->
+                        continuation.resume(uri.toString()) // Return the URL
+                    }.addOnFailureListener { exception ->
+                        continuation.resumeWithException(exception) // Handle failure to get URL
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception) // Handle failure to upload
+                }
+        }
+    }
 }
