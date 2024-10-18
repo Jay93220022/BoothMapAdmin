@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.jay.boothmap"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -74,7 +74,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("androidx.navigation:navigation-compose:2.4.0-alpha04")
-
+    implementation ("org.apache.poi:poi:5.2.3")
+    implementation ("org.apache.poi:poi-ooxml:5.2.3")
     implementation ("com.google.android.gms:play-services-location:21.0.1")
 
 }

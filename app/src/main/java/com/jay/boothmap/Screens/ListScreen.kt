@@ -1,5 +1,7 @@
 package com.jay.boothmap.Screens
-
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -22,6 +25,9 @@ import com.jay.boothmap.Dataclasses.Booth
 import com.jay.boothmap.Dataclasses.City
 import com.jay.boothmap.Navigation.Screen
 import com.jay.boothmap.Viewmodels.ListViewModel
+import kotlinx.coroutines.launch
+import org.apache.poi.ss.usermodel.WorkbookFactory
+import java.io.InputStream
 
 // Define ECI colors
 val EciOrange = Color(0xFFF26522)
@@ -31,6 +37,22 @@ val EciWhite = Color.White
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(navController: NavController, viewModel: ListViewModel) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val excelFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            coroutineScope.launch {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                inputStream?.use { stream ->
+                    val booths = readExcelFile(stream)
+                    viewModel.uploadBoothsFromExcel(booths, context)
+                }
+            }
+        }
+    }
     Scaffold(
         topBar = {
             ListScreenTopBar(
@@ -40,7 +62,10 @@ fun ListScreen(navController: NavController, viewModel: ListViewModel) {
             )
         },
         bottomBar = {
-            AddBoothButton(navController)
+            AddBoothButton(
+                navController = navController,
+                onUploadExcel = { excelFileLauncher.launch("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") }
+            )
         },
         containerColor = EciWhite
     ) { paddingValues ->
@@ -73,7 +98,30 @@ fun ListScreen(navController: NavController, viewModel: ListViewModel) {
         }
     }
 }
+private fun readExcelFile(inputStream: InputStream): List<Booth> {
+    val workbook = WorkbookFactory.create(inputStream)
+    val sheet = workbook.getSheetAt(0)
+    val booths = mutableListOf<Booth>()
 
+    for (rowIndex in 1 until sheet.physicalNumberOfRows) {
+        val row = sheet.getRow(rowIndex)
+        val booth = Booth(
+            name = row.getCell(0)?.stringCellValue ?: "",
+            bloName = row.getCell(1)?.stringCellValue ?: "",
+            bloContact = row.getCell(2)?.stringCellValue ?: "",
+            latitude = row.getCell(3)?.numericCellValue ?: 0.0,
+            longitude = row.getCell(4)?.numericCellValue ?: 0.0,
+            city = row.getCell(5)?.stringCellValue ?: "",
+            district = row.getCell(6)?.stringCellValue ?: "",
+            taluka = row.getCell(7)?.stringCellValue ?: "",
+
+        )
+        booths.add(booth)
+    }
+
+    workbook.close()
+    return booths
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ListScreenTopBar(
@@ -90,12 +138,13 @@ private fun ListScreenTopBar(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
                 placeholder = { Text("Search cities or booths", color = EciOrange.copy(alpha = 0.7f)) },
+
                 modifier = Modifier
                     .weight(1f)
                     .padding(8.dp),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-
+                    focusedTextColor = Color.Black,
                     cursorColor = EciGreen,
                     focusedBorderColor = EciGreen,
                     unfocusedBorderColor = EciGreen.copy(alpha = 0.7f)
@@ -117,20 +166,31 @@ private fun ListScreenTopBar(
 }
 
 @Composable
-private fun AddBoothButton(navController: NavController) {
+private fun AddBoothButton(navController: NavController, onUploadExcel: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = Color.White,
         shadowElevation = 8.dp
     ) {
-        Button(
-            onClick = { navController.navigate(Screen.AddBoothScreen.route) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = EciOrange)
-        ) {
-            Text("Add New Booth", color = EciWhite)
+        Column {
+            Button(
+                onClick = { navController.navigate(Screen.AddBoothScreen.route) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = EciOrange)
+            ) {
+                Text("Add New Booth", color = EciWhite)
+            }
+            Button(
+                onClick = onUploadExcel,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = EciGreen)
+            ) {
+                Text("Upload Data from Excel", color = EciWhite)
+            }
         }
     }
 }

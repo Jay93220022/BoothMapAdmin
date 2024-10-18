@@ -93,6 +93,12 @@ class BoothRepository(private val firebaseSource: FirebaseSource) {
     suspend fun deleteBooth(city: String, boothId: String) {
         firebaseSource.deleteBooth(city, boothId)
     }
+
+    suspend fun uploadBoothsFromExcel(data: List<Booth>) {
+        for (booth in data) {
+            firebaseSource.addBooth(booth)
+        }
+    }
     //Add parameter for image uri
     suspend fun updateBooth(cityName: String, boothId: String, updatedBooth: Booth) {
         firebaseSource.updateBooth(cityName, boothId, updatedBooth, updatedBooth.imageUri.toUri())

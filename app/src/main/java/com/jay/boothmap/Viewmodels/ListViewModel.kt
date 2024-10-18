@@ -1,13 +1,17 @@
 package com.jay.boothmap.Viewmodels
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
+import com.jay.boothmap.Dataclasses.Booth
 import com.jay.boothmap.Dataclasses.City
 import com.jay.boothmap.Repositories.BoothRepository
 import kotlinx.coroutines.Job
@@ -111,6 +115,19 @@ class ListViewModel(private val repository: BoothRepository) : ViewModel() {
                 _deleteStatus.value = Result.success(true)
             } catch (e: Exception) {
                 _deleteStatus.value = Result.failure(e)
+            }
+        }
+    }
+
+
+    fun uploadBoothsFromExcel(booths: List<Booth>, context: Context) {
+        viewModelScope.launch {
+            try {
+                repository.uploadBoothsFromExcel(booths)
+                Toast.makeText(context, "Booths uploaded successfully", Toast.LENGTH_SHORT).show()
+                refreshData() // Refresh the list after uploading
+            } catch (e: Exception) {
+                Toast.makeText(context, "Error uploading booths: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
