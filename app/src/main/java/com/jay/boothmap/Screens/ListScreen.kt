@@ -493,12 +493,14 @@ fun BoothItem(city: String, booth: Booth, navController: NavController, listView
 
             TextButton(
                 onClick = {
-                    navController.navigate("editScreen?city=${city}&boothId=${booth.id}&boothName=${booth.name}&bloName=${booth.bloName}&bloContact=${booth.bloContact}&district=${booth.district}&taluka=${booth.taluka}&latitude=${booth.latitude}&longitude=${booth.longitude}")
+                    navController.navigate("editScreen/${city}/${booth.id}/${booth.name}/${booth.bloName}/${booth.bloContact}/${booth.district}/${booth.taluka}/${booth.latitude}/${booth.longitude}")
                 },
                 colors = ButtonDefaults.textButtonColors(contentColor = EciOrange)
             ) {
                 Text("Edit")
             }
+
+
             TextButton(
                 onClick = { showDeleteDialog = true },
                 colors = ButtonDefaults.textButtonColors(contentColor = EciOrange)

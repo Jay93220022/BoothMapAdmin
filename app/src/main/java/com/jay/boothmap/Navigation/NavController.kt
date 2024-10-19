@@ -47,8 +47,10 @@ Register(viewModel = authViewModel, navController =navController )
         composable(Screen.ForgotPassword.route){
            ForgotPassword(viewModel = authViewModel, navController = navController)
         }
-        composable("editScreen?city={city}&boothId={boothId}&boothName={boothName}&bloName={bloName}&bloContact={bloContact}&district={district}&taluka={taluka}&latitude={latitude}&longitude={longitude}") { backStackEntry ->
-            val cityName = backStackEntry.arguments?.getString("city") ?: ""
+        composable(
+            route = "editScreen/{city}/{boothId}/{boothName}/{bloName}/{bloContact}/{district}/{taluka}/{latitude}/{longitude}"
+        ) { backStackEntry ->
+            val city = backStackEntry.arguments?.getString("city") ?: ""
             val boothId = backStackEntry.arguments?.getString("boothId") ?: ""
             val boothName = backStackEntry.arguments?.getString("boothName") ?: ""
             val bloName = backStackEntry.arguments?.getString("bloName") ?: ""
@@ -58,8 +60,9 @@ Register(viewModel = authViewModel, navController =navController )
             val latitude = backStackEntry.arguments?.getString("latitude")?.toDoubleOrNull() ?: 0.0
             val longitude = backStackEntry.arguments?.getString("longitude")?.toDoubleOrNull() ?: 0.0
 
-            EditScreen(navController, editViewModel, cityName, boothId, boothName, bloName, bloContact, district, taluka, latitude, longitude)
+            EditScreen(navController, editViewModel, city, boothId, boothName, bloName, bloContact, district, taluka, latitude, longitude)
         }
+
 
 
         composable(Screen.AddBoothScreen.route) {
