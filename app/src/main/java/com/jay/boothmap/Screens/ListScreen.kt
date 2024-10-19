@@ -1,10 +1,25 @@
 package com.jay.boothmap.Screens
+
+
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,8 +27,30 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +61,7 @@ import androidx.navigation.NavController
 import com.jay.boothmap.Dataclasses.Booth
 import com.jay.boothmap.Dataclasses.City
 import com.jay.boothmap.Navigation.Screen
+import com.jay.boothmap.Repositories.PermissionHandler
 import com.jay.boothmap.Viewmodels.ListViewModel
 import kotlinx.coroutines.launch
 import org.apache.poi.ss.usermodel.WorkbookFactory
@@ -34,11 +72,26 @@ val EciOrange = Color(0xFFF26522)
 val EciGreen = Color(0xFF017A3E)
 val EciWhite = Color.White
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(navController: NavController, viewModel: ListViewModel) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val permissionHandler = remember { PermissionHandler() }
+
+    // Request permissions when the screen is first displayed
+    permissionHandler.RequestPermissions(
+        context = context,
+        onPermissionsGranted = {
+            // Permissions granted, you can initialize location-dependent features here
+            viewModel.refreshData()
+        }
+    )
+
+    LoadingScreen(
+        isVisible = viewModel.isUploading.value,
+        progress = viewModel.uploadProgress.value,
+        message = viewModel.uploadMessage.value
+    )
 
     val excelFileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -107,13 +160,15 @@ private fun readExcelFile(inputStream: InputStream): List<Booth> {
         val row = sheet.getRow(rowIndex)
         val booth = Booth(
             name = row.getCell(0)?.stringCellValue ?: "",
-            bloName = row.getCell(1)?.stringCellValue ?: "",
-            bloContact = row.getCell(2)?.stringCellValue ?: "",
-            latitude = row.getCell(3)?.numericCellValue ?: 0.0,
-            longitude = row.getCell(4)?.numericCellValue ?: 0.0,
-            city = row.getCell(5)?.stringCellValue ?: "",
-            district = row.getCell(6)?.stringCellValue ?: "",
-            taluka = row.getCell(7)?.stringCellValue ?: "",
+            id = row.getCell(1)?.stringCellValue ?: "",
+            bloName = row.getCell(2)?.stringCellValue ?: "",
+            bloContact = row.getCell(3)?.numericCellValue?.toLong().toString(),
+            city = row.getCell(4)?.stringCellValue ?: "",
+            district = row.getCell(5)?.stringCellValue ?: "",
+            taluka = row.getCell(6)?.stringCellValue ?: "",
+            latitude = row.getCell(7)?.numericCellValue ?: 0.0,
+            longitude = row.getCell(8)?.numericCellValue ?: 0.0,
+
 
         )
         booths.add(booth)
@@ -348,7 +403,6 @@ private fun CityCard(city: City, navController: NavController, viewModel: ListVi
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BoothItem(city: String, booth: Booth, navController: NavController, listViewModel: ListViewModel) {
     var showDeleteDialog by remember { mutableStateOf(false) }

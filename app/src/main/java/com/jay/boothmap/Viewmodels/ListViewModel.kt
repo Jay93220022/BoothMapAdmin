@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
@@ -33,6 +34,15 @@ class ListViewModel(private val repository: BoothRepository) : ViewModel() {
 
     private val _errorMessage = mutableStateOf<String?>(null)
     val errorMessage: State<String?> = _errorMessage
+
+    private val _isUploading = mutableStateOf(false)
+    val isUploading: State<Boolean> = _isUploading
+
+    private val _uploadProgress = mutableFloatStateOf(0f)
+    val uploadProgress: State<Float> = _uploadProgress
+
+    private val _uploadMessage = mutableStateOf("")
+    val uploadMessage: State<String> = _uploadMessage
 
     private var searchJob: Job? = null
 
@@ -113,6 +123,7 @@ class ListViewModel(private val repository: BoothRepository) : ViewModel() {
             try {
                 repository.deleteBooth(city, boothName)
                 _deleteStatus.value = Result.success(true)
+                refreshData()
             } catch (e: Exception) {
                 _deleteStatus.value = Result.failure(e)
             }
@@ -123,11 +134,22 @@ class ListViewModel(private val repository: BoothRepository) : ViewModel() {
     fun uploadBoothsFromExcel(booths: List<Booth>, context: Context) {
         viewModelScope.launch {
             try {
-                repository.uploadBoothsFromExcel(booths)
+                _isUploading.value = true
+                _uploadMessage.value = "Preparing to upload ${booths.size} booths..."
+
+                repository.uploadBoothsFromExcel(booths) { progress, message ->
+                    _uploadProgress.value = progress
+                    _uploadMessage.value = message
+                }
+
                 Toast.makeText(context, "Booths uploaded successfully", Toast.LENGTH_SHORT).show()
-                refreshData() // Refresh the list after uploading
+                refreshData()
             } catch (e: Exception) {
                 Toast.makeText(context, "Error uploading booths: ${e.message}", Toast.LENGTH_SHORT).show()
+            } finally {
+                _isUploading.value = false
+                _uploadProgress.value = 0f
+                _uploadMessage.value = ""
             }
         }
     }

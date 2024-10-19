@@ -94,9 +94,21 @@ class BoothRepository(private val firebaseSource: FirebaseSource) {
         firebaseSource.deleteBooth(city, boothId)
     }
 
-    suspend fun uploadBoothsFromExcel(data: List<Booth>) {
-        for (booth in data) {
-            firebaseSource.addBooth(booth)
+    suspend fun uploadBoothsFromExcel(
+        data: List<Booth>,
+        onProgress: (progress: Float, message: String) -> Unit
+    ) {
+        data.forEachIndexed { index, booth ->
+            try {
+                firebaseSource.addBooth(booth)
+                val progress = (index + 1).toFloat() / data.size
+                onProgress(
+                    progress,
+                    "Uploading booth ${index + 1}/${data.size}: ${booth.name}"
+                )
+            } catch (e: Exception) {
+                throw Exception("Failed to upload booth ${booth.name}: ${e.message}")
+            }
         }
     }
     //Add parameter for image uri

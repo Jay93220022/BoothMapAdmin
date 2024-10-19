@@ -73,9 +73,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation("androidx.navigation:navigation-compose:2.4.0-alpha04")
-    implementation ("org.apache.poi:poi:5.2.3")
-    implementation ("org.apache.poi:poi-ooxml:5.2.3")
-    implementation ("com.google.android.gms:play-services-location:21.0.1")
+    implementation(libs.androidx.navigation.compose)
+    implementation (libs.poi)
+    implementation (libs.poi.ooxml)
+    implementation (libs.play.services.location)
 
 }
