@@ -36,11 +36,11 @@ This **Admin app** provides CRUD (Create, Read, Update, Delete) functionalities 
 
 ## 📱 Screenshots
 
-| Home | Add Booth | Edit Booth | Delete Booth |
-|:----------:|:------------:|:-----------:|:--------------:|
-| ![Home](screenshots/home_booth.png) | ![Add Booth](screenshots/add_booth.png) | ![Edit Booth](screenshots/edit_booth.png) | ![Delete Booth](screenshots/delete_booth.png) |
+|Login | Home | Add Booth | Edit Booth | Delete Booth | 
+|:--------------:|:----------:|:------------:|:-----------:|:--------------:|
+| ![Login](login.png)| ![Home](home_booth.png) | ![Add Booth](add_booth.png) | ![Edit Booth](edit_booth.png) | ![Delete Booth](delete_booth.png) |
 
-> 📸 Place all screenshots inside a folder named `/screenshots` in your project root and update the image paths above accordingly.
+
 
 ---
 
