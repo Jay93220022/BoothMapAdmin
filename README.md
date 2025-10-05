@@ -181,6 +181,6 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 
 ### 📬 Contact
 - 📧 Email: [jaykumar636904@gmail.com](mailto:jaykumar636904@gmail.com)
-- 💼 LinkedIn: [Jaykumar Gupta]([https://linkedin.com/in/jay-gupta](https://www.linkedin.com/in/jaykumar-gupta-aba7312a7))
+- 💼 LinkedIn: [Jaykumar Gupta](https://www.linkedin.com/in/jaykumar-gupta-aba7312a7)
 
 
